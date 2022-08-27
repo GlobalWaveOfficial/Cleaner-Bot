@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.app_commands.errors import MissingPermissions, BotMissingPermissions
+from discord.app_commands import errors
 from discord.app_commands.checks import has_permissions
 
 class Delete(commands.Cog):
@@ -19,9 +19,9 @@ class Delete(commands.Cog):
         
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, errors.MissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Channels) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, BotMissingPermissions):
+        if isinstance(error, errors.CommandInvokeError):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Channels) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         else:
             raise Exception
@@ -35,9 +35,9 @@ class Delete(commands.Cog):
         
     @thread.error
     async def thread_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, errors.MissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Threads) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, BotMissingPermissions):
+        if isinstance(error, errors.CommandInvokeError):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Threads) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         else:
             raise Exception
@@ -51,9 +51,9 @@ class Delete(commands.Cog):
         
     @role.error
     async def role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, errors.MissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Roles) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, BotMissingPermissions):
+        if isinstance(error, errors.CommandInvokeError):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Roles) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         else:
             raise Exception
@@ -72,9 +72,9 @@ class Delete(commands.Cog):
         
     @nickname.error
     async def nick_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, errors.MissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Nicknames) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, BotMissingPermissions):
+        if isinstance(error, errors.CommandInvokeError):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Nicknames) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         else:
             raise Exception
@@ -97,9 +97,9 @@ class Delete(commands.Cog):
     
     @emoji.error
     async def emoji_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, errors.MissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Emojis and Stickers) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, BotMissingPermissions):
+        if isinstance(error, errors.CommandInvokeError):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Emojis and Stickers) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         else:
             raise Exception
@@ -122,9 +122,9 @@ class Delete(commands.Cog):
 
     @category.error
     async def category_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, errors.MissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Channels) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, BotMissingPermissions):
+        if isinstance(error, errors.CommandInvokeError):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Channels) permission to process this command.", color=discord.Color.red()), ephemeral=True)
 
 
