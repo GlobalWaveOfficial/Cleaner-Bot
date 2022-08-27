@@ -14,35 +14,29 @@ class Delete(commands.Cog):
     @app_commands.describe(channel="The channel you want to delete.")
     @has_permissions(manage_channels=True)
     async def channel(self, interaction: discord.Interaction, channel: discord.TextChannel):
-        await interaction.response.defer(ephemeral=True)
-        try:
-            await channel.delete()
-            await interaction.followup.send(f"<:clean:954611061577896006> Deleted **#{channel}**")
-        except discord.errors.Forbidden:
-            await interaction.followup.send(f"<:error:954610357761105980> Sorry {interaction.user.mention}, I do not have the required **(Manage Channels)** permissions to do that!")
+        await channel.delete()
+        await interaction.followup.send(f"<:clean:954611061577896006> Deleted **#{channel}**")
         
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, MissingPermissions):
-            await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Channels)** permissions to do that!", ephemeral=True)
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Channels) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
+        if isinstance(error, BotMissingPermissions):
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Channels) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         
     @delete_group.command(name="thread", description="Delete unnecessary thread")
     @app_commands.describe(thread="The thread you want to delete.")
     @has_permissions(manage_threads=True)
     async def thread(self, interaction: discord.Interaction, thread: discord.Thread):
-        await interaction.response.defer(ephemeral=True)
-        try:
-            await thread.delete()
-            await interaction.followup.send(f"<:clean:954611061577896006> Deleted **#{thread}**")
-        except discord.errors.Forbidden:
-            await interaction.followup.send(f"<:error:954610357761105980> Sorry {interaction.user.mention}, I do not have the required **(Manage Threads)** permissions to do that!")
+        await thread.delete()
+        await interaction.followup.send(f"<:clean:954611061577896006> Deleted **#{thread}**")
         
     @thread.error
     async def thread_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, MissingPermissions):
-            await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Threads)** permissions to do that!", ephemeral=True)
-        else:
-            raise Exception
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Threads) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
+        if isinstance(error, BotMissingPermissions):
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Threads) permission to process this command.", color=discord.Color.red()), ephemeral=True)
 
     @delete_group.command(name="role", description="Delete unnecessary roles")
     @app_commands.describe(role="The role you want to delete.")
@@ -125,7 +119,7 @@ class Delete(commands.Cog):
     @category.error
     async def category_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, MissingPermissions):
-            await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Channels)** permissions to do that!", ephemeral=True)
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Channels) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
         if isinstance(error, BotMissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Channels) permission to process this command.", color=discord.Color.red()), ephemeral=True)
 
