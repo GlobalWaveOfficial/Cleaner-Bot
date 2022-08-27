@@ -1,8 +1,29 @@
 import discord
-from discord import app_commands
+from discord import app_commands, ButtonStyle
 from discord.ext import commands
+from discord.ui import View, button, Button
 from discord.app_commands import errors
 from discord.app_commands.checks import has_permissions
+
+class CategoryDeleteButtons(View):
+    def __init__(self, category):
+        self.category = category
+        super().__init__(timeout=None)
+    
+    @button(label="Confirm", style=ButtonStyle.green, custom_id="category_delete_confirm_button")
+    async def cat_del_confirm(self, interaction: discord.Interaction, button: Button):
+        index = 0
+        channel_names = ""
+        for channel in self.category.channels:
+            index += 1
+            channel_names += f"{index}. {channel.name}\n"
+        embed = discord.Embed(description=f"**Deleting 📁{self.category.name}:**\nDeleting following channels\n```{channel_names}```\n<:done:954610357727543346> **Confirmed**", color=discord.Color.green())
+
+        await interaction.response.edit_message(embed=embed, view=None)
+
+        for channel in self.category.channels:
+            await channel.delete()
+        await self.category.delete()
 
 class Delete(commands.Cog):
     def __init__(self, bot:commands.Bot) -> None:
@@ -107,7 +128,7 @@ class Delete(commands.Cog):
     @delete_group.command(name="category", description="Delete unwanted categories including their channels.")
     @app_commands.describe(category="The category you want to delete.")
     @has_permissions(manage_channels=True)
-    async def category(self, interaction: discord.Interaction, category: discord.CategoryChannel):
+    async def category_cmd(self, interaction: discord.Interaction, category: discord.CategoryChannel):
         await interaction.response.defer(ephemeral=True)
         index = 0
         channel_names = ""
@@ -115,18 +136,12 @@ class Delete(commands.Cog):
             index += 1
             channel_names += f"{index}. {channel.name}\n"
         
-        embed = discord.Embed(description=f"**Deleting 📁{category.name}:**\nFollowing channels will be deleted\n```{channel_names}```\n\n<:warn:954610357748510770> **Confirmation Required**", color=discord.Color.magenta())
-        embed.set_footer(text="This action can't be reversed!")
+        embed = discord.Embed(description=f"**Deleting 📁{category.name}:**\nFollowing channels will be deleted\n```{channel_names}```\n<:warn:954610357748510770> **Confirmation Required**", color=discord.Color.orange())
+        embed.set_footer(text="This action can't be reversed! Confirm at your own risk")
 
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed, view=CategoryDeleteButtons(category))
 
-    @category.error
-    async def category_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, errors.MissingPermissions):
-            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Channels) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
-        if isinstance(error, errors.CommandInvokeError):
-            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Channels) permission to process this command.", color=discord.Color.red()), ephemeral=True)
-
+    
 async def setup(bot: commands.Cog) -> None:
     await bot.add_cog(
         Delete(bot))

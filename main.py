@@ -21,9 +21,9 @@ class MyBot(commands.Bot):
         )
 
     async def setup_hook(self):
-        for filename in os.listdir("./cogs"):
+        for filename in os.listdir("./commands"):
             if filename.endswith('.py'):
-                await self.load_extension(f"cogs.{filename[:-3]}")
+                await self.load_extension(f"commands.{filename[:-3]}")
                 print(f"Loaded {filename}")
             
             if filename.startswith('__'):
