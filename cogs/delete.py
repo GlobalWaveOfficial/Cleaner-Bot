@@ -15,7 +15,7 @@ class Delete(commands.Cog):
     @has_permissions(manage_channels=True)
     async def channel(self, interaction: discord.Interaction, channel: discord.TextChannel):
         await channel.delete()
-        await interaction.followup.send(f"<:clean:954611061577896006> Deleted **#{channel}**")
+        await interaction.response.send_message(content=f"<:clean:954611061577896006> Deleted **#{channel}**", ephemeral=True)
         
     @channel.error
     async def channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
@@ -29,7 +29,7 @@ class Delete(commands.Cog):
     @has_permissions(manage_threads=True)
     async def thread(self, interaction: discord.Interaction, thread: discord.Thread):
         await thread.delete()
-        await interaction.followup.send(f"<:clean:954611061577896006> Deleted **#{thread}**")
+        await interaction.response.send_message(content=f"<:clean:954611061577896006> Deleted **#{thread}**", ephemeral=True)
         
     @thread.error
     async def thread_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
@@ -42,10 +42,8 @@ class Delete(commands.Cog):
     @app_commands.describe(role="The role you want to delete.")
     @has_permissions(manage_roles=True)
     async def role(self, interaction: discord.Interaction, role: discord.Role):
-        await interaction.response.defer(ephemeral=True)
         await role.delete()
-        await interaction.followup.send(f"<:clean:954611061577896006> Deleted **{role}**")
-        await interaction.followup.send(f"<:error:954610357761105980> Sorry {interaction.user.mention}, I do not have the required **(Manage Roles)** permissions to do that!")
+        await interaction.response.send_message(content=f"<:clean:954611061577896006> Deleted **{role}**", ephemeral=True)
         
     @role.error
     async def role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
