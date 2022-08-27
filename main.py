@@ -1,3 +1,4 @@
+import aiosqlite
 import asyncio
 import os
 import discord
@@ -40,15 +41,33 @@ async def on_ready():
 @commands.is_owner()
 async def reload(ctx: commands.Context, cog:str):
     # Reloads the file, thus updating the Cog class.
-    await bot.reload_extension(f"cogs.{cog}")
+    await bot.reload_extension(f"commands.{cog}")
     await ctx.send(f"🔁 {cog} reloaded!")
 
 @bot.command(name="load")
 @commands.is_owner()
 async def load(ctx: commands.Context, cog:str):
     # Reloads the file, thus updating the Cog class.
-    await bot.load_extension(f"cogs.{cog}")
+    await bot.load_extension(f"commands.{cog}")
     await ctx.send(f"🆙 {cog} loaded!")
+
+@bot.command()
+@commands.is_owner()
+async def notif_reset(ctx: commands.Context, user: discord.Member=None):
+    database = await aiosqlite.connect("data.db")
+    if user is None:
+        await database.execute("DROP TABLE NotificationView")
+        await database.commit()
+        await database.close()
+        await ctx.send("✅ Success")
+    else:
+        try:
+            await database.execute(f"DELETE FROM NotificationView WHERE user_id = {user.id}")
+            await database.commit()
+            await database.close()
+            await ctx.send("✅ Success")
+        except:
+            await ctx.send("Can't find user in NotificationView table")
 
 @bot.command()
 async def membercount(ctx):
