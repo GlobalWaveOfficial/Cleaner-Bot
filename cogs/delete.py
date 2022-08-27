@@ -23,6 +23,8 @@ class Delete(commands.Cog):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Channels) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
         if isinstance(error, BotMissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Channels) permission to process this command.", color=discord.Color.red()), ephemeral=True)
+        else:
+            raise Exception
         
     @delete_group.command(name="thread", description="Delete unnecessary thread")
     @app_commands.describe(thread="The thread you want to delete.")
@@ -37,6 +39,8 @@ class Delete(commands.Cog):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Threads) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
         if isinstance(error, BotMissingPermissions):
             await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Threads) permission to process this command.", color=discord.Color.red()), ephemeral=True)
+        else:
+            raise Exception
 
     @delete_group.command(name="role", description="Delete unnecessary roles")
     @app_commands.describe(role="The role you want to delete.")
@@ -48,7 +52,9 @@ class Delete(commands.Cog):
     @role.error
     async def role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, MissingPermissions):
-            await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Roles)** permissions to do that!", ephemeral=True)
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, you are missing (Manage Roles) permission to invoke this command.", color=discord.Color.red()), ephemeral=True)
+        if isinstance(error, BotMissingPermissions):
+            await interaction.response.send_message(embed=discord.Embed(description="<:error:954610357761105980> Missing Permissions, I'm missing (Manage Roles) permission to process this command.", color=discord.Color.red()), ephemeral=True)
         else:
             raise Exception
 
