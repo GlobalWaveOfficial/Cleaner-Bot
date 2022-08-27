@@ -19,6 +19,7 @@ These commands can be found under /clean command group
 ### **3. Delete Commands:**
 These commands can be found under /delete command group
 - **Channel:** Delete the mentioned channel.
+- **Category:** Delete the mentioned category.
 - **Role:** Delete the mentioned role.
 - **Thread:** Delete the mentioned thread.
 - **Emoji:** Delete the specified emoji.
