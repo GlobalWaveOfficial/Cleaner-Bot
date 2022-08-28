@@ -101,37 +101,64 @@ class Clean(commands.Cog):
             await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Messages)** permissions to do that!", ephemeral=True)
 
     @clean_group.command(name="bot", description="Delete 0-100 messages sent by bots from the current channel")
-    @app_commands.describe(amount="Amound of messages you want to delete, default 5")
+    @app_commands.describe(amount="Amound of messages you want to delete, default 5", bot="Select the bot whos messages you want to delete")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def bc(self, interaction: discord.Interaction, amount:int=None):
+    async def bc(self, interaction: discord.Interaction, amount:int=None, bot: discord.Member=None):
         await interaction.response.defer(ephemeral=True)
         if amount is None:
             amount = 5
         
-        messages = [msg async for msg in interaction.channel.history(limit=100)]
-        msgs = 0
-        for msg in messages:
-            if msg.author.bot:
-                try:
-                    await msg.delete()
-                    msgs += 1
-                except discord.errors.Forbidden:
-                    await interaction.followup.send("<:error:954610357761105980> Sorry, I don't have **(Manage Messages)** permission to do that!")
+        if bot is None:
+            messages = [msg async for msg in interaction.channel.history(limit=100)]
+            msgs = 0
+            for msg in messages:
+                if msg.author.bot:
+                    try:
+                        await msg.delete()
+                        msgs += 1
+                    except discord.errors.Forbidden:
+                        await interaction.followup.send("<:error:954610357761105980> Sorry, I don't have **(Manage Messages)** permission to do that!")
+                        return
+                
+                if msgs == 5:
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **Bots**!")
+                    return
+                if msgs == amount:
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **Bots**!")
                     return
             
-            if msgs == 5:
+            if msgs == 0:
+                await interaction.followup.send("<:warn:954610357748510770> There are no **Bot** messages in recent 100 messages!")
+                return
+            else:
                 await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **Bots**!")
                 return
-            if msgs == amount:
-                await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **Bots**!")
+
+        if bot is not None:
+            messages = [msg async for msg in interaction.channel.history(limit=100)]
+            msgs = 0
+            for msg in messages:
+                if msg.author == bot:
+                    try:
+                        await msg.delete()
+                        msgs += 1
+                    except discord.errors.Forbidden:
+                        await interaction.followup.send("<:error:954610357761105980> Sorry, I don't have **(Manage Messages)** permission to do that!")
+                        return
+                
+                if msgs == 5:
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **{bot.name}**!")
+                    return
+                if msgs == amount:
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **{bot.name}**!")
+                    return
+            
+            if msgs == 0:
+                await interaction.followup.send(f"<:warn:954610357748510770> There are no messagessent by **{bot.name}** in recent 100 messages!")
                 return
-        
-        if msgs == 0:
-            await interaction.followup.send("<:warn:954610357748510770> There are no **Bot** messages in recent 100 messages!")
-            return
-        else:
-            await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **Bots**!")
-            return
+            else:
+                await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **{bot.name}**!")
+                return
 
     @bc.error
     async def bc_error(self, interaction: discord.Interaction, error):
