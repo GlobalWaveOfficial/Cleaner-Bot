@@ -49,7 +49,7 @@ class ButtonsWithNotif(View):
         except:
             await interaction.response.edit_message(content="<:error:954610357761105980> Your DMs are closed!", embed=None, view=None)
     
-    @button(label="View Notification", style=discord.ButtonStyle.red, emoji="<:notif:1013118962873147432>", custom_id="help_notif")
+    @button(label="View Notification", style=discord.ButtonStyle.red, emoji="<:notif:1013118962873147432>", custom_id="help_notif", row=2)
     async def help_notif(self, interaction: discord.Interaction, button: Button):
         database = await aiosqlite.connect("data.db")
         embed = discord.Embed(
