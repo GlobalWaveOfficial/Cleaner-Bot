@@ -70,11 +70,28 @@ async def notif_reset(ctx: commands.Context, user: discord.Member=None):
             await ctx.send("Can't find user in NotificationView table")
 
 @bot.command()
+@commands.is_owner()
 async def membercount(ctx):
     count = 0
     for guild in bot.guilds:
         count += guild.member_count
     
     await ctx.send(count)
+
+@bot.command()
+@commands.is_owner()
+async def guildcount(ctx):
+    await ctx.send(len(bot.guilds))
+
+@bot.command()
+@commands.is_owner()
+async def guilds(ctx):
+    guilds = ""
+    index = 0
+    for guild in bot.guilds:
+        index += 1
+        guilds += f"{index}. {guild.name}\n"
+
+    await ctx.send(f"I'm in following guilds\n```{guilds}```")
 
 bot.run(config.BOT_TOKEN)

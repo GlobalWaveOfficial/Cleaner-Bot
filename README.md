@@ -1,3 +1,4 @@
+[![Widget](https://top.gg/api/widget/831223247357607968.svg)](https://top.gg/bot/831223247357607968)
 # **Welcome to Cleaner#8788 (v6.1)**
 *An advanced message cleaning utility bot is used to clean a specific amount of messages in a channel. Can delete channels, roles, messages.*
 
