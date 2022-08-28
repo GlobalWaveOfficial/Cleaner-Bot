@@ -66,7 +66,7 @@ class Changelog(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="changelog", description="See what's new")
-    async def help(self, interaction: discord.Interaction):
+    async def changelog(self, interaction: discord.Interaction):
         database = await aiosqlite.connect("data.db")
         await database.execute("CREATE TABLE IF NOT EXISTS NotificationView (user_id, status, PRIMARY KEY (user_id))")
         async with database.execute(f"SELECT status FROM NotificationView WHERE user_id = {interaction.user.id}") as cursor:
