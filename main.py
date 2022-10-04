@@ -11,13 +11,13 @@ import topgg
 intents = discord.Intents.default()
 intents.message_content = True
 
-class MyBot(commands.Bot):
+class MyBot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(
             command_prefix=config.PREFIX,
             intents= intents,
             status=discord.Status.idle,
-            activity=discord.Game(name="working on v6.2"),
+            activity=discord.Game(name=f"/help | v{config.BOT_VERSION}"),
             application_id = config.APPLICATION_ID
         )
 
