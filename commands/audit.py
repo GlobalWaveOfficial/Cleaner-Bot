@@ -46,6 +46,8 @@ class ResetButtons(View):
         await auditDB.execute(f"DELETE FROM AuditChannels WHERE guild_id = {interaction.guild.id}")
         await auditDB.execute(f"DELETE FROM DefaultAmount WHERE guild_id = {interaction.guild.id}")
         await auditDB.execute(f"DELETE FROM BadwordFilter WHERE guild_id = {interaction.guild.id}")
+        await auditDB.execute(f"DELETE FROM DefaultPins WHERE guild_id = {interaction.guild.id}")
+        
         await auditDB.commit()
         await interaction.response.edit_message(content=f"<:done:954610357727543346> Success!", embed=None, view=None)
 
@@ -68,12 +70,45 @@ class Audit(commands.Cog):
         await auditDB.execute("CREATE TABLE IF NOT EXISTS AuditChannels (guild_id, channel_id, PRIMARY KEY (guild_id))")
         await auditDB.execute("CREATE TABLE IF NOT EXISTS DefaultAmount (guild_id, default_amount, PRIMARY KEY (guild_id))")
         await auditDB.execute("CREATE TABLE IF NOT EXISTS BadwordFilter (guild_id, words, PRIMARY KEY (guild_id))")
+        await auditDB.execute("CREATE TABLE IF NOT EXISTS DefaultPins (guild_id, condition, PRIMARY KEY (guild_id))")
+        await auditDB.execute("CREATE TABLE IF NOT EXISTS ReportsAndSuggestions (guild_id, user_id, message_id, title, content, upvotes, downvotes, PRIMARY KEY (message_id))")
         
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------< Audit Commands >--------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     settings = app_commands.Group(name="settings", description="shows the bot settings for the current server")
+
+    @settings.command(name="default_pins", description="Assign a default pin deletion check, either Keep or Delete")
+    @app_commands.describe()
+    @app_commands.choices(default=[
+        app_commands.Choice(name="Delete", value="delete"),
+        app_commands.Choice(name="Keep", value="keep")
+    ])
+    @app_commands.checks.has_permissions(administrator=True)
+    async def pins(self, interaction: discord.Interaction, default: app_commands.Choice[str]):
+        async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+            data = await cursor.fetchone()
+
+        if default.value == "delete":
+            if data is None:
+                await auditDB.execute(f"INSERT INTO DefaultPins VALUES ({interaction.guild.id}, 'delete')")
+                await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition is set to **Delete**, your pinned messages will be deleted.", ephemeral=True)
+                await auditDB.commit()
+            else:
+                await auditDB.execute(f"UPDATE DefaultPins SET condition = 'delete' WHERE guild_id = {interaction.guild.id}")
+                await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition has been updated to **Delete**, your pinned messages will be deleted.", ephemeral=True)
+                await auditDB.commit()
+        
+        if default.value == "keep":
+            if data is None:
+                await auditDB.execute(f"INSERT INTO DefaultPins VALUES ({interaction.guild.id}, 'keep')")
+                await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition is set to **Keep**, now your pinned messages won't be deleted.", ephemeral=True)
+                await auditDB.commit()
+            else:
+                await auditDB.execute(f"UPDATE DefaultPins SET condition = 'keep' WHERE guild_id = {interaction.guild.id}")
+                await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition has been updated to **Keep**, now your pinned messages won't be deleted.", ephemeral=True)
+                await auditDB.commit()
 
     @settings.command(name="audit_channel", description="Assign a channel for Message logs")
     @app_commands.describe(channel="The channel where you want get the logs.")
@@ -192,6 +227,13 @@ class Audit(commands.Cog):
         else:
             amount_data = amount_data[0]
         
+        async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+            pins_data = await cursor.fetchone()
+        if pins_data is None:
+            pins_data = "Nill"
+        else:
+            pins_data = str(pins_data[0]).capitalize()
+        
         badwords = ""
         index = 0
         
@@ -209,6 +251,7 @@ class Audit(commands.Cog):
         embed.set_thumbnail(url="https://i.imgur.com/T12D7JH.png")
         embed.add_field(name="Audit Channel", value=f"{audit_data}", inline=False)
         embed.add_field(name="Default Cleaning Amount", value=f"{amount_data}", inline=False)
+        embed.add_field(name="Default Pins Condition", value=f"{pins_data}", inline=False)
         embed.add_field(name="Blacklisted Words", value=badwords, inline=False)
 
         await interaction.followup.send(embed=embed)

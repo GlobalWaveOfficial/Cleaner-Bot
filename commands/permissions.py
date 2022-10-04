@@ -3,7 +3,6 @@ from discord import app_commands
 from discord.app_commands.errors import MissingPermissions
 from discord.ext import commands
 from discord.ui import View, Button
-import config
 
 class PermissionUpdateButton(View):
     def __init__(self):
@@ -19,7 +18,7 @@ class Permissions(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     async def perm_check(self, interaction: discord.Interaction):
         await interaction.response.send_message("<a:load:955160502135316520> Initiating Permission Check", ephemeral=True)
-        me = interaction.guild.get_member(831223247357607968)
+        me = interaction.guild.get_member(self.bot.user.id)
         manage_roles = "<:error:954610357761105980> Manage Roles"
         manage_channels = "<:error:954610357761105980> Manage Channels"
         manage_nicknames = "<:error:954610357761105980> Manage Nicknames"

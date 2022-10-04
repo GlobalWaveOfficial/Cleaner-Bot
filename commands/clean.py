@@ -1,6 +1,6 @@
 import aiosqlite
 import discord
-from discord import app_commands, RawReactionActionEvent
+from discord import RawReactionActionEvent, app_commands
 from discord.ext import commands
 
 
@@ -15,6 +15,7 @@ class Clean(commands.Cog):
         await auditDB.execute("CREATE TABLE IF NOT EXISTS AuditChannels (guild_id, channel_id, PRIMARY KEY (guild_id))")
         await auditDB.execute("CREATE TABLE IF NOT EXISTS DefaultAmount (guild_id, default_amount, PRIMARY KEY (guild_id))")
         await auditDB.execute("CREATE TABLE IF NOT EXISTS BadwordFilter (guild_id, words, PRIMARY KEY (guild_id))")
+        await auditDB.execute("CREATE TABLE IF NOT EXISTS DefaultPins (guild_id, condition, PRIMARY KEY (guild_id))")
 
     clean_group = app_commands.Group(name="clean", description="Message cleaning related commands")
 
@@ -25,7 +26,7 @@ class Clean(commands.Cog):
         app_commands.Choice(name="Keep", value="keep")
     ])
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def clear(self, interaction: discord.Interaction, pins: app_commands.Choice[str], amount: int=None):
+    async def clear(self, interaction: discord.Interaction, pins: app_commands.Choice[str]=None, amount: int=None):
         await interaction.response.defer(ephemeral=True)
         if amount is None:
             async with auditDB.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
@@ -41,18 +42,44 @@ class Clean(commands.Cog):
             await interaction.followup.send("<:warn:954610357748510770> No message will be deleted if amount is 0!")
             return
         try:
+            if pins is None:
+                async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+                    data2 = await cursor.fetchone()
+                if data2 is None:
+                    deleted = await interaction.channel.purge(limit=amount)
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{len(deleted)}/{amount}` messages.")
+                if data2[0] == "delete":
+                    deleted = await interaction.channel.purge(limit=amount)
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{len(deleted)}/{amount}` messages.")
+                if data2[0] == "keep":
+                    counter = 0
+                    pins = await interaction.channel.pins()
+                    for i in pins:
+                        counter += 1
+                    def check(message: discord.Message):
+                        return message.pinned == False
+
+                    deleted = await interaction.channel.purge(limit=amount+counter, check=check)
+                    await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{len(deleted)}/{amount}` messages.")
+                return
+
             if pins.value == "keep":
+                pins = await interaction.channel.pins()
+                for i in pins:
+                    counter += 1
                 def check(message: discord.Message):
                     return message.pinned == False
 
-                deleted = await interaction.channel.purge(limit=amount, check=check)
+                deleted = await interaction.channel.purge(limit=amount+counter, check=check)
                 await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{len(deleted)}/{amount}` messages.")
 
             if pins.value == "delete":
                 deleted = await interaction.channel.purge(limit=amount)
                 await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{len(deleted)}/{amount}` messages.")
-        except discord.errors.Forbidden:
+
+        except:
             await interaction.followup.send("<:error:954610357761105980> Sorry, I don't have **(Manage Messages)** permission to do that!")
+            raise Exception
 
     @clear.error
     async def clean_error(self, interaction: discord.Interaction, error):
@@ -101,14 +128,14 @@ class Clean(commands.Cog):
             await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Messages)** permissions to do that!", ephemeral=True)
 
     @clean_group.command(name="bot", description="Delete 0-100 messages sent by bots from the current channel")
-    @app_commands.describe(amount="Amound of messages you want to delete, default 5", bot="Select the bot whos messages you want to delete")
+    @app_commands.describe(amount="Amound of messages you want to delete, default 5", bot="The bot whose messages you want to delete.")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def bc(self, interaction: discord.Interaction, amount:int=None, bot: discord.Member=None):
+    async def bc(self, interaction: discord.Interaction, bot: discord.Member=None, amount:int=None):
         await interaction.response.defer(ephemeral=True)
         if amount is None:
             amount = 5
         
-        if bot is None:
+        if bot is None:        
             messages = [msg async for msg in interaction.channel.history(limit=100)]
             msgs = 0
             for msg in messages:
@@ -133,8 +160,12 @@ class Clean(commands.Cog):
             else:
                 await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **Bots**!")
                 return
+        
+        if bot.bot is False:
+            await interaction.followup.send("<:error:954610357761105980> You can only choose bot users!")
+            return
 
-        if bot is not None:
+        else:
             messages = [msg async for msg in interaction.channel.history(limit=100)]
             msgs = 0
             for msg in messages:
@@ -154,7 +185,7 @@ class Clean(commands.Cog):
                     return
             
             if msgs == 0:
-                await interaction.followup.send(f"<:warn:954610357748510770> There are no messagessent by **{bot.name}** in recent 100 messages!")
+                await interaction.followup.send("<:warn:954610357748510770> There are no **Bot** messages in recent 100 messages!")
                 return
             else:
                 await interaction.followup.send(f"<:clean:954611061577896006> Deleted `{msgs}/{amount}` messages sent by **{bot.name}**!")
@@ -164,6 +195,8 @@ class Clean(commands.Cog):
     async def bc_error(self, interaction: discord.Interaction, error):
         if isinstance(error, app_commands.errors.MissingPermissions):
             await interaction.response.send_message(f"<:error:954610357761105980> Sorry {interaction.user.mention}, you do not have the required **(Manage Messages)** permissions to do that!", ephemeral=True)
+        else:
+            raise Exception
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
