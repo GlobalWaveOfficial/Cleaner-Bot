@@ -1,11 +1,18 @@
-# **Welcome to Cleaner#8788 (v6.1)**
+# **Welcome to Cleaner#8788 (v6.2)**
 *An advanced message cleaning utility bot is used to clean a specific amount of messages in a channel. Can delete channels, roles, messages.*
+
+# **Changelog v6.2:**
+- Pinned Message Argument is now Optional
+- Added Category Delete Command
+- Added New Settings Command
+- Added Latest News Section
+- Updated Support System
+##### For further information use command /changelog or /help
 
 # **Commands:**
 **1. Help:** Shows help page with all commands
 
 ------------
-
 
 ### **2. Cleaning Commands:**
 These commands can be found under /clean command group
@@ -39,6 +46,7 @@ These commands can be found under /purge command group
 ### **5. Settings Commands:**
 These commands can be found under /settings command group
 - **Audit Channel:** Set a channel to get message logs.
+- **Default Pins:** Set default pinned messages check condition.
 - **Default Amount:** Set default cleaning amount for clean message command
 - **Reset:** Reset all settings for the current server.
 - **Show:** View the current settings for the server.
@@ -62,9 +70,10 @@ Following command can be invoked by server owner only.
 
 ### **8. Other Commands:**
 - **Check Permissions:** Check if the bot has all necessary permisions to work properly
-- **Info:** Show bot information
-- **Changelog:** Show latest changelog.
-- **Ping:** Show bot current latency.
+- **News:** Shows latest announcements or news by the developers
+- **Changelog:** Shows latest changelog.
+- **Ping:** Shows bot current latency.
+- **Info:** Shows bot information
 - **Help:** Shows this message.
 
 ------------
@@ -72,7 +81,7 @@ Following command can be invoked by server owner only.
 
 # **Authors:**
 ### **Developers:**
-- Developer X#0001
+- **Developer X#7105**
 ------------
 ### **Beta Testers:**
 - God Of Life
@@ -81,4 +90,4 @@ Following command can be invoked by server owner only.
 - TomClancy
 - Powered
 ------------
-***For any queries join the [support server](https://discord.gg/vfsBUqZNdr "support server"), and our support assitants will help you out. If you are not satisfied, just drop me a DM (Developer X#0001)***
+***For any queries join the [support server](https://discord.gg/vfsBUqZNdr "support server"), and our support assitants will help you out. If you are not satisfied, just drop me a DM (Developer X#7105)***
