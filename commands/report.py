@@ -79,7 +79,7 @@ class BugReport(discord.ui.Modal, title="Report"):
         )
         suggestion_embed.set_author(name=interaction.user, icon_url=interaction.user.avatar)
         msg = await channel.send(embed=suggestion_embed, view=ReportButtons())
-        await auditDB.execute(f'INSERT INTO ReportsAndSuggestions VALUES ({interaction.guild.id}, {interaction.user.id}, {msg.id}, "{self.heading}", "{self.suggestion}", 0, 0)')
+        await auditDB.execute(f'INSERT INTO ReportsAndSuggestions VALUES ({interaction.guild.id}, {interaction.user.id}, {msg.id}, "{self.heading}", "{self.report}", 0, 0)')
         await interaction.response.send_message("<:thankyou:966151700018765835> Your report has been sent!", ephemeral=True)
         await auditDB.commit()
         return
