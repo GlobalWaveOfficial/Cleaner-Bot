@@ -16,7 +16,7 @@ class MyBot(commands.AutoShardedBot):
         super().__init__(
             command_prefix=config.PREFIX,
             intents= intents,
-            status=discord.Status.idle,
+            status=discord.Status.dnd,
             activity=discord.Game(name=f"/help | v{config.BOT_VERSION}"),
             application_id = config.APPLICATION_ID
         )
