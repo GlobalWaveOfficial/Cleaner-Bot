@@ -43,14 +43,16 @@ class ReportButtons(View):
     
     @button(style=ButtonStyle.gray, emoji="<:upvote:1026912667824312350>", custom_id="upvote_button")
     async def upvote_button(self, interaction: discord.Interaction, button: Button):
-        await auditDB.execute(f"UPDATE ReportsAndSuggestions SET upvotes = upvotes + 1 WHERE message_id = {interaction.message.id}")
-        await auditDB.commit()
+        database = await aiosqlite.connect("data.db")
+        await database.execute(f"UPDATE ReportsAndSuggestions SET upvotes = upvotes + 1 WHERE message_id = {interaction.message.id}")
+        await database.commit()
         await interaction.response.send_message(content="<:done:954610357727543346> Success!", ephemeral=True)
     
     @button(style=ButtonStyle.gray, emoji="<:downvote:1026912669812412437>", custom_id="downvote_button")
     async def downvote_button(self, interaction: discord.Interaction, button: Button):
-        await auditDB.execute(f"UPDATE ReportsAndSuggestions SET downvotes = downvotes + 1 WHERE message_id = {interaction.message.id}")
-        await auditDB.commit()
+        database = await aiosqlite.connect("data.db")
+        await database.execute(f"UPDATE ReportsAndSuggestions SET downvotes = downvotes + 1 WHERE message_id = {interaction.message.id}")
+        await database.commit()
         await interaction.response.send_message(content="<:done:954610357727543346> Success!", ephemeral=True)
 
 class BugReport(discord.ui.Modal, title="Report"):

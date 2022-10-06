@@ -2,6 +2,8 @@ import aiosqlite
 import asyncio
 import os
 import discord
+from commands.report import ReportButtons
+from commands.suggestion import SuggestionButtons
 from discord import app_commands
 from discord.ext import commands
 from discord.ext import tasks
@@ -22,6 +24,8 @@ class MyBot(commands.AutoShardedBot):
         )
 
     async def setup_hook(self):
+        self.add_view(ReportButtons())
+        self.add_view(SuggestionButtons())
         for filename in os.listdir("./commands"):
             if filename.endswith('.py'):
                 await self.load_extension(f"commands.{filename[:-3]}")

@@ -209,14 +209,14 @@ class Audit(commands.Cog):
         async with auditDB.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
             badword_data = await cursor.fetchone()
         if badword_data is None:
-            badword_data = "Nill"
+            badword_data = "None"
         else:
             badword_data = badword_data[0].split(",")
         
         async with auditDB.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {interaction.guild.id}") as cursor2:
             audit_data = await cursor2.fetchone()
         if audit_data is None:
-            audit_data = "Nill"
+            audit_data = "None"
         else:
             audit_data = self.bot.get_channel(audit_data[0]).mention
         
@@ -230,19 +230,19 @@ class Audit(commands.Cog):
         async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
             pins_data = await cursor.fetchone()
         if pins_data is None:
-            pins_data = "Nill"
+            pins_data = "None"
         else:
             pins_data = str(pins_data[0]).capitalize()
         
         badwords = ""
         index = 0
         
-        if badword_data != "Nill":
+        if badword_data != "None":
             for word in badword_data:
                 index += 1
                 badwords += f"{index}. {word}\n"
         else:
-            badwords = "Nill"
+            badwords = "None"
 
         embed = discord.Embed(
             title=f"Cleaner Configuration for {interaction.guild.name}",
@@ -463,6 +463,7 @@ class Audit(commands.Cog):
         await auditDB.execute(f"DELETE FROM AuditChannels WHERE guild_id = {guild.id}")
         await auditDB.execute(f"DELETE FROM DefaultAmount WHERE guild_id = {guild.id}")
         await auditDB.execute(f"DELETE FROM BadwordFilter WHERE guild_id = {guild.id}")
+        await auditDB.execute(f"DELETE FROM DefaultPins WHERE guild_id = {guild.id}")
         await auditDB.commit()
         
 async def setup(bot: commands.Bot) -> None:
