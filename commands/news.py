@@ -16,10 +16,6 @@ class News(commands.Cog):
         embed.set_thumbnail(url=interaction.client.user.avatar.url)
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
-    
-    @commands.command(name="test")
-    async def test(self, ctx: commands.Context):
-        await ctx.send("hi")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(

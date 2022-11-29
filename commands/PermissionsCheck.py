@@ -1,20 +1,14 @@
 import discord
+from discord.ext import commands
 from discord import app_commands
 from discord.app_commands.errors import MissingPermissions
-from discord.ext import commands
-from discord.ui import View, Button
-
-class PermissionUpdateButton(View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-        self.add_item(Button(label="Re-Invite", url="https://discord.com/api/oauth2/authorize?client_id=831223247357607968&permissions=430973479952&scope=bot%20applications.commands"))
+from Interface.Buttons.PermissionUpdateButton import PermissionUpdateButton
 
 class Permissions(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="check_permissions", description="Check if the bot has all required permissions.")
+    @app_commands.command(name="permissions-check", description="Check if the bot has all required permissions.")
     @app_commands.checks.has_permissions(administrator=True)
     async def perm_check(self, interaction: discord.Interaction):
         await interaction.response.send_message("<a:load:955160502135316520> Initiating Permission Check", ephemeral=True)
@@ -79,7 +73,8 @@ class Permissions(commands.Cog):
                 description=f"{manage_roles}\n{manage_channels}\n{manage_nicknames}\n{manage_emojis_and_stickers}\n{read_messages}\n{send_messages}\n{send_messages_in_threads}\n{manage_messages}\n{manage_threads}\n{embed_links}\n{read_message_history}\n{use_external_emojis}\n{use_external_stickers}\n\n<:done:954610357727543346> All permissions are granted!",
                 color=discord.Color.magenta()
             )
-            embed.set_thumbnail(url=interaction.guild.icon.url)
+            if interaction.guild.icon:
+                embed.set_thumbnail(url=interaction.guild.icon.url)
             await interaction.edit_original_response(content=None, embed=embed)
         
         if counter != 13:
@@ -88,7 +83,8 @@ class Permissions(commands.Cog):
                 description=f"{manage_roles}\n{manage_channels}\n{manage_nicknames}\n{manage_emojis_and_stickers}\n{read_messages}\n{send_messages}\n{send_messages_in_threads}\n{manage_messages}\n{manage_threads}\n{embed_links}\n{read_message_history}\n{use_external_emojis}\n{use_external_stickers}\n\n<:warn:954610357748510770> Missing permissions found!",
                 color=discord.Color.magenta()
             )
-            embed.set_thumbnail(url=interaction.guild.icon.url)
+            if interaction.guild.icon:
+                embed.set_thumbnail(url=interaction.guild.icon.url)
             embed.set_footer(text="Click the button below, to re-invite the bot without kicking")
             await interaction.edit_original_response(content=None, embed=embed, view=PermissionUpdateButton())
     
@@ -102,5 +98,3 @@ class Permissions(commands.Cog):
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(
         Permissions(bot))
-
-#self.bot.application_info()
