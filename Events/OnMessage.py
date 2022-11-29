@@ -10,7 +10,6 @@ class OnMessage(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         try:
             async with auditDB.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {message.channel.guild.id}") as cursor1:
                 data = await cursor1.fetchone()
@@ -28,6 +27,11 @@ class OnMessage(commands.Cog):
                         await message.delete()
         except:
             pass
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        global auditDB
+        auditDB = await aiosqlite.connect("./Databases/data.db")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(

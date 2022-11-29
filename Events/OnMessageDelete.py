@@ -24,6 +24,11 @@ class OnMessageDelete(commands.Cog):
             channel = message.guild.get_channel(data[0])
             await channel.send(embed= discord.Embed(title="Message Deleted!", description= f"<:time:954610357576548444> **Time** `{UpTime}`\n<:author:954610357761081424> **Author** {message.author.mention}\n<:channel:954457643227942923> **Channel** {message.channel.mention}\n<:messages:954610357773684837> **Message Content:** {message.content}", color=discord.Color.magenta()))
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        global auditDB
+        auditDB = await aiosqlite.connect("./Databases/data.db")
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(
         OnMessageDelete(bot))
