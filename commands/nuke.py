@@ -37,7 +37,7 @@ class Nuke(commands.Cog):
                 description=f"You can't use this command at the moment, please try again after the cooldown.\n**Time Left:** {timeleft.days} days\n\n<:cleaner:954598059952734268> Please ask `{self.bot.application.owner.name}#{self.bot.application.owner.discriminator}` in **Cleaner** support, if you were eligible and really needy to use `/nuke` command again then we will reset it for you. 😉",
                 color=discord.Color.magenta()
             )
-            embed.set_footer(text="This command can be used once per 30 days.")
+            embed.set_footer(text="This command can be used once per 15 days.")
             embed.set_thumbnail(url="https://i.imgur.com/T12D7JH.png")
 
             await interaction.followup.send(embed=embed)
