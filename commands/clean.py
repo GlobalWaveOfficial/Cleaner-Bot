@@ -19,7 +19,6 @@ class Clean(commands.Cog):
     @app_commands.checks.bot_has_permissions(manage_messages=True)
     async def clear(self, interaction: discord.Interaction, pins: app_commands.Choice[str]=None, amount: int=None, contains: str=None):
         await interaction.response.defer(ephemeral=True)
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         if contains is None:
             def contain_check(message: discord.Message):
                 return message
@@ -29,7 +28,7 @@ class Clean(commands.Cog):
                 return contains in message.content
 
         if amount is None:
-            async with auditDB.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
                 data = await cursor.fetchone()
             if data is None:
                 amount = 5
@@ -46,7 +45,7 @@ class Clean(commands.Cog):
             return
 
         if pins is None:
-            async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
                 data2 = await cursor.fetchone()
             if data2 is None:
                 deleted = await interaction.channel.purge(limit=amount, check=contain_check)
@@ -135,7 +134,6 @@ class Clean(commands.Cog):
     @app_commands.checks.bot_has_permissions(manage_messages=True)
     async def uc(self, interaction: discord.Interaction, user: discord.Member, pins: app_commands.Choice[str]=None, amount: int=None, contains: str=None):
         await interaction.response.defer(ephemeral=True)
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         if contains is None:
             def contain_check(message: discord.Message):
                 return message
@@ -149,7 +147,7 @@ class Clean(commands.Cog):
             return
 
         if amount is None:
-            async with auditDB.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
                 data = await cursor.fetchone()
             if data is None:
                 amount = 5
@@ -169,7 +167,7 @@ class Clean(commands.Cog):
             return message.author == user
 
         if pins is None:
-            async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
                 data2 = await cursor.fetchone()
             if data2 is None:
                     deleted = await interaction.channel.purge(limit=amount, check=user_check and contain_check)
@@ -231,7 +229,6 @@ class Clean(commands.Cog):
     @app_commands.checks.bot_has_permissions(manage_messages=True)
     async def bc(self, interaction: discord.Interaction, bot: discord.Member=None, pins: app_commands.Choice[str]=None, amount:int=None, contains: str=None):
         await interaction.response.defer(ephemeral=True)
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         if contains is None:
             def contain_check(message: discord.Message):
                 return message
@@ -241,7 +238,7 @@ class Clean(commands.Cog):
                 return contains in message.content
 
         if amount is None:
-            async with auditDB.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
                 data = await cursor.fetchone()
             if data is None:
                 amount = 5
@@ -270,7 +267,7 @@ class Clean(commands.Cog):
                 return message.author == bot
 
         if pins is None:
-            async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
                 data2 = await cursor.fetchone()
             if data2 is None:
                     deleted = await interaction.channel.purge(limit=amount, check=user_check and contain_check)

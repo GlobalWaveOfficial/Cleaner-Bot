@@ -14,8 +14,7 @@ class SuggestionReplyModal(Modal, title="Report/Suggestion Reply"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        database = await aiosqlite.connect("data.db")
-        async with database.execute(f"SELECT user_id, title, content, upvotes, downvotes FROM ReportsAndSuggestions WHERE message_id = {interaction.message.id}") as cursor:
+        async with interaction.client.database.execute(f"SELECT user_id, title, content, upvotes, downvotes FROM ReportsAndSuggestions WHERE message_id = {interaction.message.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             await interaction.response.send_message("<:error:954610357761105980> Oops! Something went wrong...", ephemeral=True)

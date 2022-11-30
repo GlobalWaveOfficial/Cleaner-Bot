@@ -21,7 +21,6 @@ class BugReport(discord.ui.Modal, title="Report"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         channel = interaction.client.get_channel(1004064457204437152)
         suggestion_embed = discord.Embed(
             title=self.heading,
@@ -33,9 +32,9 @@ class BugReport(discord.ui.Modal, title="Report"):
         suggestion_embed.set_footer(text=f"Sent from, Guild: {interaction.guild.name} | Members: {interaction.guild.member_count}")
 
         msg = await channel.send(embed=suggestion_embed, view=ReportButtons())
-        await auditDB.execute(f'INSERT INTO ReportsAndSuggestions VALUES ({interaction.guild.id}, {interaction.user.id}, {msg.id}, "{self.heading}", "{self.report}", 0, 0)')
+        await interaction.client.database.execute(f'INSERT INTO ReportsAndSuggestions VALUES ({interaction.guild.id}, {interaction.user.id}, {msg.id}, "{self.heading}", "{self.report}", 0, 0)')
         await interaction.response.send_message("<:thankyou:966151700018765835> Your report has been sent!", ephemeral=True)
-        await auditDB.commit()
+        await interaction.client.database.commit()
         return
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):

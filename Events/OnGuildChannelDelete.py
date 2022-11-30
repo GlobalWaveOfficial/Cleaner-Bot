@@ -9,15 +9,14 @@ class OnGuildJoin(commands.Cog):
     
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
-        async with auditDB.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {channel.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {channel.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             pass
         else:
             if channel.id == data[0]:
-                await auditDB.execute(f"DELETE FROM AuditChannels WHERE guild_id = {channel.guild.id}")
-                await auditDB.commit()
+                await self.bot.database.execute(f"DELETE FROM AuditChannels WHERE guild_id = {channel.guild.id}")
+                await self.bot.database.commit()
             else:
                 pass
 

@@ -40,10 +40,9 @@ class ChangelogButtonsWithNotif(View):
     
     @button(label="View Notification", style=discord.ButtonStyle.red, emoji="<:notif:1013118962873147432>", custom_id="help_notif")
     async def help_notif(self, interaction: discord.Interaction, button: Button):
-        database = await aiosqlite.connect("./Databases/data.db")
         notification_embed.set_thumbnail(url=interaction.client.user.avatar.url)
-        await database.execute(f"INSERT INTO NotificationView VALUES ({interaction.user.id}, 'viewed') ON CONFLICT (user_id) DO UPDATE SET status = 'viewed' WHERE user_id = {interaction.user.id}")
-        await database.commit()
+        await interaction.client.database.execute(f"INSERT INTO NotificationView VALUES ({interaction.user.id}, 'viewed') ON CONFLICT (user_id) DO UPDATE SET status = 'viewed' WHERE user_id = {interaction.user.id}")
+        await interaction.client.database.commit()
         await interaction.response.edit_message(content="<:done:954610357727543346> **Notification Viewed**", embed=notification_embed, view=ChangelogGoBackButtons())
 
 class ChangelogGoBackButtons(View):

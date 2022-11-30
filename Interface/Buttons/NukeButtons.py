@@ -49,12 +49,11 @@ class NukeConfirm(View):
     @button(label="Confirm", style=discord.ButtonStyle.green, custom_id="nuke_confirm")
     @app_commands.checks.bot_has_permissions(manage_channels=True, manage_roles=True)
     async def nuke_confirm(self, interaction: discord.Interaction, button: Button):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         now_time = datetime.datetime.now()
         cooldown = datetime.timedelta(days=15)
         future_time = now_time + cooldown
-        await auditDB.execute(f"INSERT INTO NukeCooldowns VALUES ({interaction.guild.id}, {round(future_time.timestamp())}, 'running')")
-        await auditDB.commit()
+        await interaction.client.database.execute(f"INSERT INTO NukeCooldowns VALUES ({interaction.guild.id}, {round(future_time.timestamp())}, 'running')")
+        await interaction.client.database.commit()
         before_time = datetime.datetime.now()
         await interaction.response.edit_message(content="<:warn:954610357748510770> NUKE STARTED", embed=None, view=None)
         roles = []

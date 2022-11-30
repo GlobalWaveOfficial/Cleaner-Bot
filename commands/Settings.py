@@ -20,46 +20,44 @@ class Settings(commands.Cog):
     ])
     @app_commands.checks.has_permissions(administrator=True)
     async def pins(self, interaction: discord.Interaction, default: app_commands.Choice[str]):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
-        async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
 
         if default.value == "delete":
             if data is None:
-                await auditDB.execute(f"INSERT INTO DefaultPins VALUES ({interaction.guild.id}, 'delete')")
+                await self.bot.database.execute(f"INSERT INTO DefaultPins VALUES ({interaction.guild.id}, 'delete')")
                 await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition is set to **Delete**, your pinned messages will be deleted.", ephemeral=True)
-                await auditDB.commit()
+                await self.bot.database.commit()
             else:
-                await auditDB.execute(f"UPDATE DefaultPins SET condition = 'delete' WHERE guild_id = {interaction.guild.id}")
+                await self.bot.database.execute(f"UPDATE DefaultPins SET condition = 'delete' WHERE guild_id = {interaction.guild.id}")
                 await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition has been updated to **Delete**, your pinned messages will be deleted.", ephemeral=True)
-                await auditDB.commit()
+                await self.bot.database.commit()
         
         if default.value == "keep":
             if data is None:
-                await auditDB.execute(f"INSERT INTO DefaultPins VALUES ({interaction.guild.id}, 'keep')")
+                await self.bot.database.execute(f"INSERT INTO DefaultPins VALUES ({interaction.guild.id}, 'keep')")
                 await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition is set to **Keep**, now your pinned messages won't be deleted.", ephemeral=True)
-                await auditDB.commit()
+                await self.bot.database.commit()
             else:
-                await auditDB.execute(f"UPDATE DefaultPins SET condition = 'keep' WHERE guild_id = {interaction.guild.id}")
+                await self.bot.database.execute(f"UPDATE DefaultPins SET condition = 'keep' WHERE guild_id = {interaction.guild.id}")
                 await interaction.response.send_message(content="<:done:954610357727543346> Default pins check condition has been updated to **Keep**, now your pinned messages won't be deleted.", ephemeral=True)
-                await auditDB.commit()
+                await self.bot.database.commit()
 
     @settings.command(name="audit-channel", description="Assign a channel for Message logs")
     @app_commands.describe(channel="The channel where you want get the logs.")
     @app_commands.checks.has_permissions(administrator=True)
     async def audit(self, interaction: discord.Interaction, channel: discord.TextChannel):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
-        await auditDB.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, {channel.id}, NULL, NULL) ON CONFLICT (guild_id) DO UPDATE SET variable_1 = {channel.id} WHERE guild_id = {interaction.guild.id}")
-        await auditDB.commit()
+        await self.bot.database.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, {channel.id}, NULL, NULL) ON CONFLICT (guild_id) DO UPDATE SET variable_1 = {channel.id} WHERE guild_id = {interaction.guild.id}")
+        await self.bot.database.commit()
         await interaction.response.defer(ephemeral=True)
-        async with auditDB.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             try:
-                await auditDB.execute(f"INSERT INTO AuditChannels VALUES ({interaction.guild.id}, {channel.id})")
+                await self.bot.database.execute(f"INSERT INTO AuditChannels VALUES ({interaction.guild.id}, {channel.id})")
                 await interaction.followup.send(f"<:done:954610357727543346> Successfully assigned {channel.mention} for Message Logs.")
                 await channel.send(f"**{interaction.user}** has set this channel for Message Logs.")
-                await auditDB.commit()
+                await self.bot.database.commit()
             except discord.errors.Forbidden:
                 await interaction.followup.send(f"<:error:954610357761105980> Sorry, I'm unable to send messages in {channel.mention}.")
                 raise Exception
@@ -69,8 +67,8 @@ class Settings(commands.Cog):
 
         else:
             prv_chnl = interaction.guild.get_channel(data[0])
-            await auditDB.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, NULL, {prv_chnl.id}, NULL) ON CONFLICT (guild_id) DO UPDATE SET variable_2 = {prv_chnl.id} WHERE guild_id = {interaction.guild.id}")
-            await auditDB.commit()
+            await self.bot.database.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, NULL, {prv_chnl.id}, NULL) ON CONFLICT (guild_id) DO UPDATE SET variable_2 = {prv_chnl.id} WHERE guild_id = {interaction.guild.id}")
+            await self.bot.database.commit()
             embed = discord.Embed(
                 title="Old Audit Channel Detected!",
                 description="I've noticed that, an audit channel for this server is already set. Would you like to replace it with new one?",
@@ -89,10 +87,9 @@ class Settings(commands.Cog):
     @app_commands.describe(amount="The amount you want to set as default cleaning amount.")
     @app_commands.checks.has_permissions(administrator=True)
     async def set_amount(self, interaction: discord.Interaction, amount: int):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         amt = amount
-        await auditDB.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, NULL, NULL, {amt}) ON CONFLICT (guild_id) DO UPDATE SET variable_3 = {amt} WHERE guild_id = {interaction.guild.id}")
-        await auditDB.commit()
+        await self.bot.database.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, NULL, NULL, {amt}) ON CONFLICT (guild_id) DO UPDATE SET variable_3 = {amt} WHERE guild_id = {interaction.guild.id}")
+        await self.bot.database.commit()
         await interaction.response.defer(ephemeral=True)
         if amount > 100:
             await interaction.followup.send(content="<:error:954610357761105980> Default amount can't be greater than `100`!")
@@ -102,12 +99,12 @@ class Settings(commands.Cog):
         if amount < 0:
             await interaction.followup.send(content="<:error:954610357761105980> Default amount can't lower than zero!")
         else:
-            async with auditDB.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
+            async with self.bot.database.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor:
                 data = await cursor.fetchone()
             if data is None:
-                await auditDB.execute(f"INSERT INTO DefaultAmount VALUES ({interaction.guild.id}, {amount})")
+                await self.bot.database.execute(f"INSERT INTO DefaultAmount VALUES ({interaction.guild.id}, {amount})")
                 await interaction.followup.send(f"<:done:954610357727543346> Default cleaning amount is now set to `{amount}`")
-                await auditDB.commit()
+                await self.bot.database.commit()
             
             if data[0] == amount:
                 await interaction.followup.send(f"<:error:954610357761105980> Default cleaning amount is already set to `{amount}`")
@@ -146,9 +143,8 @@ class Settings(commands.Cog):
     @settings.command(name="show", description="Shows the current bot configuration for the current server")
     @app_commands.checks.has_permissions(administrator=True)
     async def show(self, interaction: discord.Interaction):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         await interaction.response.defer(ephemeral=True)
-        async with auditDB.execute(f"SELECT channel_1, duration_1 FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT channel_1, duration_1 FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}") as cursor:
             autodel_data = await cursor.fetchone()
         if autodel_data is None:
             autodel_data = "Not Configured\n`/settings auto-delete <channel>`"
@@ -166,28 +162,28 @@ class Settings(commands.Cog):
             
             autodel_data = f"Channel: {autodel_data_channel.mention}\nDuration: {time}"
 
-        async with auditDB.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor1:
+        async with self.bot.database.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor1:
             data = await cursor1.fetchone()
         if data is None:
             badword_data = "Not Configured\n`/badwords add <word>`"
         else:
             badword_data = data[0].split(",")
         
-        async with auditDB.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {interaction.guild.id}") as cursor2:
+        async with self.bot.database.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {interaction.guild.id}") as cursor2:
             audit_data = await cursor2.fetchone()
         if audit_data is None:
             audit_data = "Not Configured\n`/settings audit-channel <channel>`"
         else:
             audit_data = self.bot.get_channel(audit_data[0]).mention
         
-        async with auditDB.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor3:
+        async with self.bot.database.execute(f"SELECT default_amount FROM DefaultAmount WHERE guild_id = {interaction.guild.id}") as cursor3:
             amount_data = await cursor3.fetchone()
         if amount_data is None:
             amount_data = "5 (Not Configured)\n`/settings default-amount <amount>`"
         else:
             amount_data = amount_data[0]
         
-        async with auditDB.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT condition FROM DefaultPins WHERE guild_id = {interaction.guild.id}") as cursor:
             pins_data = await cursor.fetchone()
         if pins_data is None:
             pins_data = "Not Configured\n`/settings default-pins <condition>`"

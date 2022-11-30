@@ -21,7 +21,6 @@ class SubSuggestion(discord.ui.Modal, title="Suggestion"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         channel = interaction.client.get_channel(1004064457204437152)
         suggestion_embed = discord.Embed(
             title=self.heading,
@@ -33,9 +32,9 @@ class SubSuggestion(discord.ui.Modal, title="Suggestion"):
         suggestion_embed.set_footer(text=f"Sent from, Guild: {interaction.guild.name} | Members: {interaction.guild.member_count}")
         
         msg = await channel.send(embed=suggestion_embed, view=SuggestionButtons())
-        await auditDB.execute(f'INSERT INTO ReportsAndSuggestions VALUES ({interaction.guild.id}, {interaction.user.id}, {msg.id}, "{self.heading}", "{self.suggestion}", 0, 0)')
+        await interaction.client.database.execute(f'INSERT INTO ReportsAndSuggestions VALUES ({interaction.guild.id}, {interaction.user.id}, {msg.id}, "{self.heading}", "{self.suggestion}", 0, 0)')
         await interaction.response.send_message("<:thankyou:966151700018765835> Your suggestion has been recorded!", ephemeral=True)
-        await auditDB.commit()
+        await interaction.client.database.commit()
         return
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):

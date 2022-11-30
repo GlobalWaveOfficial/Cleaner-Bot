@@ -22,7 +22,6 @@ class AutoDelete(commands.Cog):
     @app_commands.checks.bot_has_permissions(manage_channels=True)
     async def auto_del(self, interaction: discord.Interaction, channel: discord.TextChannel, duration: app_commands.Choice[int]):
         await interaction.response.defer(ephemeral=True)
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         
         if duration.value >= 60:
             minutes = duration.value%3600//60
@@ -33,19 +32,19 @@ class AutoDelete(commands.Cog):
             seconds = duration.value%3600%60%60
             time = f"{seconds} seconds"
 
-        async with auditDB.execute(f"SELECT channel_1, duration_1 FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT channel_1, duration_1 FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
-            await auditDB.execute(f"INSERT INTO AutoDeleteChannels VALUES ({interaction.guild.id}, {channel.id}, {duration.value}, NULL, NULL, NULL, NULL)")
-            await auditDB.commit()
+            await self.bot.database.execute(f"INSERT INTO AutoDeleteChannels VALUES ({interaction.guild.id}, {channel.id}, {duration.value}, NULL, NULL, NULL, NULL)")
+            await self.bot.database.commit()
             await interaction.followup.send(f"<:done:954610357727543346> Auto-delete has been enabled in {channel.mention} with {time}.")
         else:
             old_channel = interaction.guild.get_channel(data[0])
             if old_channel == channel:
                 await interaction.followup.send(f"<:warn:954610357748510770> {channel.mention} has auto-delete working already!")
             else:
-                await auditDB.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, {channel.id}, {duration.value}, NULL) ON CONFLICT (guild_id) DO UPDATE SET variable_1 = {channel.id}, variable_2 = {duration.value} WHERE guild_id = {interaction.guild.id}")
-                await auditDB.commit()
+                await self.bot.database.execute(f"INSERT INTO DataTransfer VALUES ({interaction.guild.id}, {channel.id}, {duration.value}, NULL) ON CONFLICT (guild_id) DO UPDATE SET variable_1 = {channel.id}, variable_2 = {duration.value} WHERE guild_id = {interaction.guild.id}")
+                await self.bot.database.commit()
                 embed = discord.Embed(
                     title="Auto-delete is already enabled!",
                     description=f"Auto-delete is already enabled in {old_channel.mention}, would you like to replace it with {channel.mention}",
@@ -66,15 +65,14 @@ class AutoDelete(commands.Cog):
     @app_commands.checks.has_permissions(manage_channels=True)
     @app_commands.checks.bot_has_permissions(manage_channels=True)
     async def auto_del_disable(self, interaction: discord.Interaction):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
-        async with auditDB.execute(f"SELECT channel_1, duration_1 FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT channel_1, duration_1 FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             await interaction.response.send_message("<:warn:954610357748510770> Auto-delete isn't configured in this server.", ephemeral=True)
         
         else:
-            await auditDB.execute(f"DELETE FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}")
-            await auditDB.commit()
+            await self.bot.database.execute(f"DELETE FROM AutoDeleteChannels WHERE guild_id = {interaction.guild.id}")
+            await self.bot.database.commit()
             await interaction.response.send_message("<:done:954610357727543346> Auto-delete has been disabled.", ephemeral=True)
     
     @auto_del_disable.error

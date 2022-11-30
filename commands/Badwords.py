@@ -13,13 +13,12 @@ class Audit(commands.Cog):
     @app_commands.describe(word="The word you want to blacklist.")
     @app_commands.checks.has_permissions(manage_messages=True)
     async def add(self, interaction: discord.Interaction, word:str):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         await interaction.response.defer(ephemeral=True)
-        async with auditDB.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
-            await auditDB.execute(f"INSERT INTO BadwordFilter VALUES ({interaction.guild.id}, '{word}')")
-            await auditDB.commit()
+            await self.bot.database.execute(f"INSERT INTO BadwordFilter VALUES ({interaction.guild.id}, '{word}')")
+            await self.bot.database.commit()
             await interaction.followup.send(f"<:done:954610357727543346> Added `{word}` to blacklisted words")
         else:
             words_string = ""
@@ -29,8 +28,8 @@ class Audit(commands.Cog):
                 words_string += f"{worrd},"
 
             words_to_add = words_string[:-1]
-            await auditDB.execute(f"UPDATE BadwordFilter SET words = '{words_to_add}' WHERE guild_id = {interaction.guild.id}")
-            await auditDB.commit()
+            await self.bot.database.execute(f"UPDATE BadwordFilter SET words = '{words_to_add}' WHERE guild_id = {interaction.guild.id}")
+            await self.bot.database.commit()
             await interaction.followup.send(f"<:done:954610357727543346> Added `{word}` to blacklisted words")
     
     @add.error
@@ -42,9 +41,8 @@ class Audit(commands.Cog):
     @app_commands.describe(word="The word you want to remove from blacklist.")
     @app_commands.checks.has_permissions(manage_messages=True)
     async def remove(self, interaction: discord.Interaction, word:str):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         await interaction.response.defer(ephemeral=True)
-        async with auditDB.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             await interaction.followup.send("<:warn:954610357748510770> The provided word can't be found in blacklisted words")
@@ -66,12 +64,12 @@ class Audit(commands.Cog):
             
             words_to_add = string_words[:-1]
             if len_words == 0:
-                await auditDB.execute(f"DELETE FROM BadwordFilter WHERE guild_id = {interaction.guild.id}")
-                await auditDB.commit()
+                await self.bot.database.execute(f"DELETE FROM BadwordFilter WHERE guild_id = {interaction.guild.id}")
+                await self.bot.database.commit()
                 await interaction.followup.send(f"<:done:954610357727543346> Removed `{word}` from blacklisted words.")
             if len_words > 0:
-                await auditDB.execute(f"UPDATE BadwordFilter SET words = '{words_to_add}' WHERE guild_id = {interaction.guild.id}")
-                await auditDB.commit()
+                await self.bot.database.execute(f"UPDATE BadwordFilter SET words = '{words_to_add}' WHERE guild_id = {interaction.guild.id}")
+                await self.bot.database.commit()
                 await interaction.followup.send(f"<:done:954610357727543346> Removed `{word}` from blacklisted words.")
     
     @remove.error
@@ -82,9 +80,8 @@ class Audit(commands.Cog):
     @bad_words.command(name="list", description="List the blacklisted words for your server")
     @app_commands.checks.has_permissions(manage_messages=True)
     async def word_list(self, interaction: discord.Interaction):
-        auditDB = await aiosqlite.connect("./Databases/data.db")
         await interaction.response.defer(ephemeral=True)
-        async with auditDB.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT words FROM BadwordFilter WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             await interaction.followup.send("<:warn:954610357748510770> There aren't any blacklisted words for this server.")

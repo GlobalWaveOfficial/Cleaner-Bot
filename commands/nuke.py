@@ -12,8 +12,7 @@ class Nuke(commands.Cog):
     @app_commands.command(name="nuke", description="This is a dangerous command, your whole server will be wiped")
     async def nuke(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        auditDB = await aiosqlite.connect("./Databases/data.db")
-        async with auditDB.execute(f"SELECT timestamp, status FROM NukeCooldowns WHERE guild_id = {interaction.guild.id}") as cursor:
+        async with self.bot.database.execute(f"SELECT timestamp, status FROM NukeCooldowns WHERE guild_id = {interaction.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             if interaction.user.id == interaction.guild.owner_id:

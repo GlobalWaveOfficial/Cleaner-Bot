@@ -11,9 +11,8 @@ class Help(commands.Cog):
 
     @app_commands.command(name="help", description="Get a list of available commands")
     async def help(self, interaction: discord.Interaction):
-        database = await aiosqlite.connect("./Databases/data.db")
-        await database.execute("CREATE TABLE IF NOT EXISTS NotificationView (user_id, status, PRIMARY KEY (user_id))")
-        async with database.execute(f"SELECT status FROM NotificationView WHERE user_id = {interaction.user.id}") as cursor:
+        await self.bot.database.execute("CREATE TABLE IF NOT EXISTS NotificationView (user_id, status, PRIMARY KEY (user_id))")
+        async with self.bot.database.execute(f"SELECT status FROM NotificationView WHERE user_id = {interaction.user.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
             resp_embed = discord.Embed(
