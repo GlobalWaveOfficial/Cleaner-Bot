@@ -1,5 +1,6 @@
 import aiosqlite
 import discord
+import typing
 from discord import app_commands
 from discord.ext import commands
 
@@ -8,7 +9,7 @@ class OnGuildJoin(commands.Cog):
         self.bot = bot
     
     @commands.Cog.listener()
-    async def on_guild_channel_delete(self, channel):
+    async def on_guild_channel_delete(self, channel: discord.TextChannel):
         async with self.bot.database.execute(f"SELECT channel_id FROM AuditChannels WHERE guild_id = {channel.guild.id}") as cursor:
             data = await cursor.fetchone()
         if data is None:
