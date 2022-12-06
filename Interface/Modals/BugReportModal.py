@@ -21,7 +21,7 @@ class BugReport(discord.ui.Modal, title="Report"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        channel = interaction.client.get_channel(1004064457204437152)
+        channel = interaction.client.get_channel(1004064539479916655)
         suggestion_embed = discord.Embed(
             title=self.heading,
             description=self.report,

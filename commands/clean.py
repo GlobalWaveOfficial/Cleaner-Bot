@@ -298,6 +298,7 @@ class Clean(commands.Cog):
 
         elif pins.value == "keep":
                 pins = await interaction.channel.pins()
+                counter = 0
                 for i in pins:
                     counter += 1
                 def check(message: discord.Message):
