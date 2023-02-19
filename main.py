@@ -1,9 +1,10 @@
-import aiosqlite
 import os
 import discord
+import aiosqlite
+from discord.ext import commands
 from Interface.Buttons.ReportButtons import ReportButtons
 from Interface.Buttons.SuggestionButtons import SuggestionButtons
-from discord.ext import commands
+
 import config
 
 intents = discord.Intents.default()
